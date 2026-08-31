@@ -216,21 +216,28 @@ body::after {
 
 /* ---------- the wall ---------- */
 
+/* explicit flex columns (JS distributes cards) — CSS multicol leaves
+   big voids in Safari when items are break-inside: avoid */
 .wall {
   max-width: 1400px;
   margin: 0 auto;
-  columns: 288px;
-  column-gap: 1.7rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.7rem;
   padding-top: 0.5rem;
+}
+
+.wall-col {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .photo {
   position: relative;
-  display: inline-block;
+  display: block;
   width: 100%;
   margin: 0 0 1.9rem;
   padding-top: 8px;
-  break-inside: avoid;
   transform: rotate(var(--tilt, -2deg));
   transform-origin: 50% 8px;              /* swing from the pin */
   animation: drop-in 0.55s cubic-bezier(0.2, 0.7, 0.3, 1.1) both,
@@ -256,6 +263,12 @@ body::after {
   78%  { transform: rotate(calc(var(--tilt, -2deg) - 1deg)); }
   100% { transform: rotate(var(--tilt, -2deg)); }
 }
+
+/* once settled, entry animations are switched off so re-slotting cards
+   into columns (resize, new uploads) doesn't replay the drop-in */
+.photo.pinned { animation: none; }
+.photo.pinned img,
+.photo.pinned video { animation: none; }
 
 /* the paper print itself — idle sway + hover swing live here so they
    never restart the card's entry animation */
@@ -469,7 +482,7 @@ body::after {
 /* ---------- small screens ---------- */
 
 @media (max-width: 560px) {
-  .wall { columns: 2 150px; column-gap: 1rem; }
+  .wall { gap: 1rem; }
   .photo { margin-bottom: 1.2rem; }
   .photo figcaption { font-size: 1.05rem; }
   .lb-arrow { display: none; }   /* swipe-sized screens: tap edges instead */

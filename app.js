@@ -29,6 +29,14 @@ const photos = STOCK.map((p, i) => ({
   isVideo: !!p.isVideo,
 }));
 
+/* shared storage — guest uploads live in a public Supabase bucket */
+const SUPABASE_URL = 'https://knftyqkhampkqchoncel.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuZnR5cWtoYW1wa3FjaG9uY2VsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NDg4MzYsImV4cCI6MjA2NzAyNDgzNn0.fugiTRvgoD3YqAZPQMV3R6Eu0Wx_9vgE6ZK8zjqFutg';
+const BUCKET = 'wall';
+const sb = typeof supabase !== 'undefined'
+  ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : null;
+
 const wall = document.getElementById('wall');
 const loader = document.getElementById('loader');
 const board = document.getElementById('board');
@@ -104,6 +112,11 @@ function buildCard(photo, delaySec) {
   paper.addEventListener('animationend', (e) => {
     if (e.animationName === 'hover-swing') fig.classList.remove('swinging');
   });
+  // once settled, disable entry animations so re-slotting into columns
+  // (resize, new uploads) doesn't replay the drop-in
+  fig.addEventListener('animationend', (e) => {
+    if (e.animationName === 'settle') fig.classList.add('pinned');
+  });
 
   fig._photo = photo;
   const open = () => openLightbox(photos.indexOf(photo));
@@ -114,7 +127,63 @@ function buildCard(photo, delaySec) {
   return fig;
 }
 
-photos.forEach((p, i) => wall.append(buildCard(p, 0.06 * i)));
+/* explicit flex columns — Safari's CSS multicol leaves large voids when
+   every item is break-inside: avoid, so we distribute cards ourselves */
+const cards = [];
+let colCount = 0;
+
+function columnCountFor(width) {
+  return width < 560 ? 2 : Math.min(4, Math.max(2, Math.floor(width / 300)));
+}
+
+function layoutWall() {
+  colCount = columnCountFor(wall.clientWidth || document.documentElement.clientWidth);
+  wall.innerHTML = '';
+  const cols = Array.from({ length: colCount }, () => {
+    const c = document.createElement('div');
+    c.className = 'wall-col';
+    return c;
+  });
+  wall.append(...cols);
+  cards.forEach((card, i) => cols[i % colCount].append(card));
+}
+
+photos.forEach((p, i) => cards.push(buildCard(p, 0.06 * i)));
+layoutWall();
+
+window.addEventListener('resize', () => {
+  if (columnCountFor(wall.clientWidth) !== colCount) layoutWall();
+});
+
+/* pull everyone's uploads from the shared bucket */
+async function loadShared() {
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.storage.from(BUCKET)
+      .list('uploads', { limit: 500, sortBy: { column: 'created_at', order: 'desc' } });
+    if (error) throw error;
+    const items = (data || []).filter((f) => f.name && !f.name.startsWith('.'));
+    // iterate oldest→newest so the newest ends up pinned first
+    [...items].reverse().forEach((f, i) => {
+      const isVideo = /\.(mp4|mov|webm|m4v)$/i.test(f.name) ||
+        String(f.metadata?.mimetype || '').startsWith('video/');
+      const d = f.created_at ? new Date(f.created_at) : null;
+      const photo = {
+        src: sb.storage.from(BUCKET).getPublicUrl(`uploads/${f.name}`).data.publicUrl,
+        cap: isVideo ? 'caught on tape 🎬' : 'fresh from your camera ✨',
+        filename: `guest-${f.name.replace(/^\d+-\w+-/, '')}`,
+        stamp: d ? `${String(d.getDate()).padStart(2, '0')} ${String(d.getMonth() + 1).padStart(2, '0')} '${String(d.getFullYear() % 100)}` : '',
+        isVideo,
+      };
+      photos.unshift(photo);
+      cards.unshift(buildCard(photo, 0.08 * (items.length - 1 - i)));
+    });
+    if (items.length) layoutWall();
+  } catch (e) {
+    console.warn('shared wall unavailable', e);
+  }
+}
+loadShared();
 
 /* ---------- loading: wait for the film to develop ---------- */
 
@@ -132,6 +201,7 @@ Promise.race([
 
 function reveal() {
   board.hidden = false;
+  layoutWall();   // clientWidth was 0 while hidden — recompute columns
   loader.classList.add('done');
   setTimeout(() => loader.remove(), 600);
 }
@@ -154,7 +224,28 @@ fileInput.addEventListener('change', () => {
   fileInput.value = '';
 });
 
-function addFiles(files) {
+/* shrink big photos before upload — phone shots don't need to be 8MB */
+async function compressImage(file) {
+  if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
+  try {
+    const bmp = await createImageBitmap(file);
+    const max = 1600;
+    const scale = Math.min(1, max / Math.max(bmp.width, bmp.height));
+    if (scale === 1 && file.size < 1500000) return file;
+    const c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * scale);
+    c.height = Math.round(bmp.height * scale);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.85));
+    return blob && blob.size < file.size
+      ? new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' })
+      : file;
+  } catch {
+    return file;
+  }
+}
+
+async function addFiles(files) {
   const media = files.filter((f) => f.type.startsWith('image/') || f.type.startsWith('video/'));
   if (!media.length) return;
   const d = new Date();
@@ -170,9 +261,34 @@ function addFiles(files) {
       isVideo,
     };
     photos.unshift(photo);
-    wall.prepend(buildCard(photo, 0.1 * i));
+    cards.unshift(buildCard(photo, 0.1 * i));
   });
-  showToast(`${media.length} new pin${media.length > 1 ? 's' : ''} on the wall! (test mode: visible in this tab only for now)`, 5000);
+  layoutWall();
+
+  if (!sb) {
+    showToast('offline — pinned in this tab only', 5000);
+    return;
+  }
+  showToast('pinning to the shared wall…', 60000);
+  let ok = 0;
+  let failed = 0;
+  await Promise.all(media.map(async (file) => {
+    try {
+      const upload = file.type.startsWith('image/') ? await compressImage(file) : file;
+      const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${upload.name.replace(/[^\w.\-]+/g, '_')}`;
+      const { error } = await sb.storage.from(BUCKET).upload(path, upload, { contentType: upload.type });
+      if (error) throw error;
+      ok += 1;
+    } catch (e) {
+      console.error('upload failed', e);
+      failed += 1;
+    }
+  }));
+  if (failed) {
+    showToast(`${failed} upload${failed > 1 ? 's' : ''} didn't stick — only on this tab. try again?`, 6000);
+  } else {
+    showToast(`${ok} pinned for everyone! 📌`, 5000);
+  }
 }
 
 /* ---------- downloads ---------- */
