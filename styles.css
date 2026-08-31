@@ -38,7 +38,7 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: 5;
-  opacity: 0.05;
+  opacity: 0.075;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   animation: grain-shift 5s steps(1) infinite;
 }
@@ -62,6 +62,10 @@ body::after {
   pointer-events: none;
   z-index: -1;
   background:
+    /* coarse plaster clouds */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.014' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.11'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='520' height='520' filter='url(%23p)'/%3E%3C/svg%3E"),
+    /* fine plaster speckle */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.16' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23f)'/%3E%3C/svg%3E"),
     radial-gradient(42% 30% at 18% 22%, rgba(193, 168, 122, 0.20), transparent 70%),
     radial-gradient(36% 28% at 82% 12%, rgba(180, 150, 105, 0.14), transparent 70%),
     radial-gradient(50% 38% at 75% 80%, rgba(196, 172, 128, 0.18), transparent 70%),
@@ -298,19 +302,20 @@ body::after {
   animation: sway var(--sway, 6s) ease-in-out calc(var(--delay, 0s) + 2.25s) infinite;
 }
 
-/* lifted bottom corners — the print curls slightly off the wall */
-.paper::before,
-.paper::after {
+/* one continuous lift shadow along the bottom — the print sits slightly
+   off the wall (two split corner shadows read like a tear at the center) */
+.paper::before {
   content: '';
   position: absolute;
-  bottom: 7px;
-  width: 46%;
-  height: 18px;
+  left: 10px;
+  right: 10px;
+  bottom: 8px;
+  height: 16px;
   z-index: -1;
-  box-shadow: 0 10px 12px rgba(42, 36, 32, 0.3);
+  border-radius: 50% / 10px;
+  box-shadow: 0 9px 12px rgba(42, 36, 32, 0.28);
+  transform: rotate(-0.5deg);
 }
-.paper::before { left: 6px; transform: rotate(-2.4deg) skewX(-4deg); }
-.paper::after  { right: 6px; transform: rotate(2.4deg) skewX(4deg); }
 
 .photo:hover .paper {
   box-shadow:

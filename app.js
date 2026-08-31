@@ -25,7 +25,7 @@ const photos = STOCK.map((p, i) => ({
   src: `photos/${p.seed}.${p.isVideo ? 'mp4' : 'jpg'}?v=2`,
   cap: p.cap,
   filename: `michelle-kevin-${String(i + 1).padStart(2, '0')}.${p.isVideo ? 'mp4' : 'jpg'}`,
-  stamp: "30 08 '26",
+  stamp: "22 08 '26",
   isVideo: !!p.isVideo,
 }));
 
