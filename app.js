@@ -8,6 +8,7 @@ const STOCK = [
   { seed: 'mk05', cap: 'blurry but very happy' },
   { seed: 'mk06', cap: 'dance floor situation' },
   { seed: 'mk07', cap: 'cheers × one hundred' },
+  { seed: 'mk15', cap: 'the dance floor, live 🎬', isVideo: true },
   { seed: 'mk08', cap: 'the confetti aftermath' },
   { seed: 'mk09', cap: '3am survivors club' },
   { seed: 'mk10', cap: 'the toast, take two' },
@@ -21,10 +22,11 @@ const PIN_COLORS = ['#8A5A38', '#DCCBA8', '#3B7A4A', '#2A2420'];
 
 /** All photos on the wall, newest first. {src, cap, filename, stamp} */
 const photos = STOCK.map((p, i) => ({
-  src: `photos/${p.seed}.jpg?v=2`,
+  src: `photos/${p.seed}.${p.isVideo ? 'mp4' : 'jpg'}?v=2`,
   cap: p.cap,
-  filename: `michelle-kevin-${String(i + 1).padStart(2, '0')}.jpg`,
+  filename: `michelle-kevin-${String(i + 1).padStart(2, '0')}.${p.isVideo ? 'mp4' : 'jpg'}`,
   stamp: "30 08 '26",
+  isVideo: !!p.isVideo,
 }));
 
 const wall = document.getElementById('wall');
