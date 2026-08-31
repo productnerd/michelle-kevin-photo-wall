@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Michelle &amp; Kevin — The Photo Wall</title>
+  <meta name="description" content="Every disposable camera from the party, developed and pinned to one wall. Look, download, add your own." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@700&family=Special+Elite&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=11" />
+</head>
+<body>
+
+  <!-- Developing overlay -->
+  <div id="loader" class="loader" aria-live="polite">
+    <svg class="loader-cam" viewBox="0 0 120 80" width="150" aria-hidden="true">
+      <rect x="4" y="16" width="112" height="60" rx="10" fill="#FFFDF6" stroke="#2A2420" stroke-width="3.5"/>
+      <rect x="26" y="6" width="26" height="14" rx="4" fill="#DCCBA8" stroke="#2A2420" stroke-width="3.5"/>
+      <circle cx="60" cy="46" r="17" fill="#FFFDF6" stroke="#2A2420" stroke-width="3.5"/>
+      <circle cx="60" cy="46" r="8" fill="#2A2420"/>
+      <rect class="loader-flash" x="88" y="24" width="16" height="12" rx="3" fill="#DCCBA8" stroke="#2A2420" stroke-width="3"/>
+      <circle cx="16" cy="28" r="3.5" fill="#8A5A38"/>
+    </svg>
+    <p class="loader-text">developing the film<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
+  </div>
+
+  <main id="board" class="board" hidden>
+    <header class="banner-wrap">
+      <section class="banner" aria-label="About this wall">
+        <span class="pin banner-pin-l" style="--pin:#8A5A38"></span>
+        <span class="pin banner-pin-r" style="--pin:#3B7A4A"></span>
+        <h1>Michelle <span class="amp">&amp;</span> Kevin</h1>
+        <p class="where">calgary &middot; august 2026</p>
+        <div class="actions">
+          <button id="addBtn" class="btn btn-brown" type="button">&#128247; Add your photos</button>
+          <button id="downloadAllBtn" class="btn btn-beige" type="button">&#8595; Download all</button>
+        </div>
+        <input id="fileInput" type="file" accept="image/*,video/*" multiple hidden />
+      </section>
+    </header>
+
+    <section id="wall" class="wall" aria-label="Photo wall"></section>
+
+    <p class="footer-note">shot on disposables &middot; developed with love &middot; aug '26</p>
+  </main>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <button class="lb-close" id="lbClose" type="button" aria-label="Close">&times;</button>
+    <button class="lb-arrow lb-prev" id="lbPrev" type="button" aria-label="Previous photo">&#8249;</button>
+    <figure class="lb-paper">
+      <div class="lb-media" id="lbMedia"></div>
+      <figcaption id="lbCaption"></figcaption>
+      <button id="lbDownload" class="btn btn-brown lb-download" type="button">&#8595; Download this one</button>
+    </figure>
+    <button class="lb-arrow lb-next" id="lbNext" type="button" aria-label="Next photo">&#8250;</button>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="app.js?v=7"></script>
+</body>
+</html>

@@ -1,0 +1,483 @@
+/* ============================================================
+   Michelle & Kevin — party photo wall
+   Theme family: travelconcierge (cream / off-black / red / amber)
+   ============================================================ */
+
+:root {
+  --cream: #F5F0E8;
+  --paper: #FFFDF6;
+  --off-black: #2A2420;
+  --brown: #8A5A38;
+  --beige: #DCCBA8;
+  --green: #3B7A4A;
+  --stamp-orange: #FF9E3D;
+
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-type: 'Special Elite', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; }
+
+html {
+  scrollbar-gutter: stable;
+  background: var(--cream);
+}
+
+body {
+  font-family: var(--font-display);
+  color: var(--off-black);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* subtle paper grain over the whole wall, with a slow film shimmer */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 5s steps(1) infinite;
+}
+
+@keyframes grain-shift {
+  0%   { background-position: 0 0; }
+  14%  { background-position: -14px 9px; }
+  28%  { background-position: 8px -17px; }
+  42%  { background-position: -6px -11px; }
+  56%  { background-position: 13px 6px; }
+  70%  { background-position: -11px 14px; }
+  84%  { background-position: 7px -8px; }
+  100% { background-position: 0 0; }
+}
+
+/* aged-paper mottling behind everything, drifting very slowly */
+body::after {
+  content: '';
+  position: fixed;
+  inset: -12%;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(42% 30% at 18% 22%, rgba(193, 168, 122, 0.20), transparent 70%),
+    radial-gradient(36% 28% at 82% 12%, rgba(180, 150, 105, 0.14), transparent 70%),
+    radial-gradient(50% 38% at 75% 80%, rgba(196, 172, 128, 0.18), transparent 70%),
+    radial-gradient(30% 24% at 10% 78%, rgba(170, 145, 100, 0.14), transparent 70%),
+    radial-gradient(24% 18% at 48% 55%, rgba(205, 185, 145, 0.10), transparent 70%),
+    radial-gradient(140% 120% at 50% 45%, transparent 55%, rgba(125, 100, 62, 0.13) 100%);
+  animation: paper-drift 55s ease-in-out infinite alternate;
+}
+
+@keyframes paper-drift {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  50%  { transform: translate(-1.4%, 1%) rotate(0.4deg); }
+  100% { transform: translate(1.1%, -1.2%) rotate(-0.3deg); }
+}
+
+/* ---------- developing overlay ---------- */
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+  background: var(--cream);
+  transition: opacity 0.45s ease;
+}
+.loader.done { opacity: 0; pointer-events: none; }
+
+.loader-cam { animation: cam-wiggle 1.6s ease-in-out infinite; }
+.loader-flash { animation: flash-blink 1.6s steps(1) infinite; }
+
+@keyframes cam-wiggle {
+  0%, 100% { transform: rotate(-3deg); }
+  50%      { transform: rotate(3deg); }
+}
+@keyframes flash-blink {
+  0%, 78%  { fill: var(--beige); }
+  80%, 92% { fill: #FFFFFF; }
+  94%      { fill: var(--beige); }
+}
+
+.loader-text {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+.dots span {
+  animation: dot-bounce 1.2s infinite;
+  display: inline-block;
+}
+.dots span:nth-child(2) { animation-delay: 0.15s; }
+.dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dot-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%           { transform: translateY(-4px); }
+}
+
+/* ---------- banner ---------- */
+
+.board { padding: 2rem clamp(1rem, 4vw, 3rem) 3rem; }
+
+.banner-wrap {
+  max-width: 640px;
+  margin: 0 auto 2.8rem;
+}
+
+.banner {
+  position: relative;
+  background: var(--paper);
+  border: 2px solid var(--off-black);
+  box-shadow: 5px 6px 0 rgba(42, 36, 32, 0.22);
+  padding: 2rem 1.5rem 1.8rem;
+  text-align: center;
+  transform: rotate(-1deg);
+  border-radius: 8px;
+}
+
+.banner h1 {
+  font-size: clamp(2.4rem, 7vw, 3.8rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+.banner .amp { color: var(--brown); }
+
+.where {
+  font-style: italic;
+  font-size: 1.2rem;
+  margin-top: 0.35rem;
+  opacity: 0.75;
+}
+
+.actions {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.3rem;
+}
+
+.btn {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.1rem;
+  padding: 0.55rem 1.1rem;
+  border: 2px solid var(--off-black);
+  box-shadow: 3px 3px 0 var(--off-black);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.btn:active {
+  box-shadow: none;
+  transform: translate(3px, 3px);
+}
+.btn:disabled { opacity: 0.6; cursor: wait; }
+.btn-brown { background: var(--brown); color: #fff; }
+.btn-beige { background: var(--beige); color: var(--off-black); }
+
+/* ---------- pins ---------- */
+
+.pin {
+  position: absolute;
+  z-index: 3;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%,
+      rgba(255, 255, 255, 0.85) 0 12%,
+      var(--pin, var(--brown)) 42%,
+      color-mix(in srgb, var(--pin, var(--brown)), black 40%) 100%);
+  box-shadow: 0 3px 4px rgba(30, 26, 22, 0.4);
+}
+.pin::after {
+  /* little needle shadow on the paper */
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 7px;
+  width: 2px;
+  height: 6px;
+  background: rgba(30, 26, 22, 0.28);
+  transform: rotate(8deg);
+}
+
+.banner-pin-l { top: -8px; left: 12%; }
+.banner-pin-r { top: -8px; right: 14%; }
+
+/* ---------- the wall ---------- */
+
+.wall {
+  max-width: 1400px;
+  margin: 0 auto;
+  columns: 288px;
+  column-gap: 1.7rem;
+  padding-top: 0.5rem;
+}
+
+.photo {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 1.9rem;
+  padding-top: 8px;
+  break-inside: avoid;
+  transform: rotate(var(--tilt, -2deg));
+  transform-origin: 50% 8px;              /* swing from the pin */
+  animation: drop-in 0.55s cubic-bezier(0.2, 0.7, 0.3, 1.1) both,
+             settle 1.7s ease-in-out 0.55s both;
+  animation-delay: var(--delay, 0s), calc(var(--delay, 0s) + 0.55s);
+  cursor: zoom-in;
+}
+
+.photo .pin {
+  top: 0;
+  left: 50%;
+  margin-left: var(--pinx, -8px);
+}
+
+@keyframes drop-in {
+  from { opacity: 0; transform: translateY(-46px) rotate(calc(var(--tilt, -2deg) + 8deg)); }
+  to   { opacity: 1; transform: translateY(0)     rotate(calc(var(--tilt, -2deg) + 8deg)); }
+}
+@keyframes settle {
+  0%   { transform: rotate(calc(var(--tilt, -2deg) + 8deg)); }
+  28%  { transform: rotate(calc(var(--tilt, -2deg) - 5deg)); }
+  55%  { transform: rotate(calc(var(--tilt, -2deg) + 2.5deg)); }
+  78%  { transform: rotate(calc(var(--tilt, -2deg) - 1deg)); }
+  100% { transform: rotate(var(--tilt, -2deg)); }
+}
+
+/* the paper print itself — idle sway + hover swing live here so they
+   never restart the card's entry animation */
+.paper {
+  background: var(--paper);
+  border: 2px solid var(--off-black);
+  box-shadow: 5px 6px 0 rgba(42, 36, 32, 0.18);
+  border-radius: 6px;
+  padding: 9px 9px 0.4rem;
+  transform-origin: 50% -8px;
+  animation: sway var(--sway, 6s) ease-in-out calc(var(--delay, 0s) + 2.25s) infinite;
+}
+.photo.swinging .paper {
+  animation: hover-swing 1.7s ease-in-out;
+}
+.photo:hover { z-index: 4; }
+
+@keyframes sway {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(0.7deg); }
+  75%      { transform: rotate(-0.7deg); }
+}
+@keyframes hover-swing {
+  0%   { transform: rotate(0deg); }
+  14%  { transform: rotate(4deg); }
+  34%  { transform: rotate(-3deg); }
+  54%  { transform: rotate(1.7deg); }
+  72%  { transform: rotate(-0.8deg); }
+  87%  { transform: rotate(0.35deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.img-wrap {
+  position: relative;
+  overflow: hidden;
+  background: #E9E2D3;
+  min-height: 60px;
+  border-radius: 3px;
+}
+.img-wrap img,
+.img-wrap video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* photos "develop" as they arrive */
+.photo.developing img,
+.photo.developing video {
+  animation: develop 1.3s ease-out both;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes develop {
+  from { filter: sepia(0.7) blur(7px) brightness(1.5) contrast(0.65); }
+  to   { filter: none; }
+}
+
+/* orange film date stamp */
+.stamp {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--stamp-orange);
+  text-shadow: 0 0 5px rgba(255, 158, 61, 0.9), 0 0 1px rgba(255, 158, 61, 1);
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
+.photo figcaption {
+  font-family: var(--font-type);
+  font-size: 0.85rem;
+  line-height: 1.3;
+  text-align: center;
+  padding: 0.55rem 0.2rem 0.4rem;
+  color: var(--off-black);
+}
+
+.sticker-new {
+  position: absolute;
+  top: 14px;
+  left: -10px;
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--beige);
+  border: 2px solid var(--off-black);
+  padding: 0.1rem 0.45rem;
+  transform: rotate(-8deg);
+  border-radius: 4px;
+}
+
+.footer-note {
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.95rem;
+  margin-top: 2.5rem;
+  opacity: 0.65;
+}
+
+/* ---------- lightbox ---------- */
+
+.lightbox[hidden] { display: none; }
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgba(30, 26, 22, 0.82);
+  padding: 2.5rem 1rem;
+}
+
+.lb-paper {
+  background: var(--paper);
+  border: 2px solid var(--off-black);
+  box-shadow: 7px 8px 0 rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+  padding: 12px 12px 0.8rem;
+  max-width: min(88vw, 900px);
+  text-align: center;
+  transform: rotate(-0.6deg);
+  animation: lb-pop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+}
+@keyframes lb-pop {
+  from { opacity: 0; transform: scale(0.9) rotate(-3deg); }
+  to   { opacity: 1; transform: scale(1) rotate(-0.6deg); }
+}
+
+.lb-media img,
+.lb-media video {
+  display: block;
+  max-width: 100%;
+  max-height: 68vh;
+  margin: 0 auto;
+  border-radius: 4px;
+}
+
+.lb-paper figcaption {
+  font-family: var(--font-type);
+  font-size: 1.05rem;
+  padding: 0.7rem 0 0.55rem;
+}
+
+.lb-download { font-size: 0.85rem; }
+
+.lb-close,
+.lb-arrow {
+  background: var(--paper);
+  border: 2px solid var(--off-black);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  font-family: var(--font-display);
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.lb-close:active,
+.lb-arrow:active { box-shadow: none; transform: translate(3px, 3px); }
+
+.lb-close {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.2rem;
+  width: 44px;
+  height: 44px;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.lb-arrow {
+  width: 46px;
+  height: 46px;
+  font-size: 1.8rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ---------- toast ---------- */
+
+.toast {
+  position: fixed;
+  bottom: 1.4rem;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1deg);
+  z-index: 70;
+  background: var(--green);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 400;
+  border: 2px solid var(--off-black);
+  box-shadow: 4px 4px 0 rgba(42, 36, 32, 0.35);
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  max-width: min(92vw, 480px);
+  text-align: center;
+  animation: toast-in 0.3s ease-out;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px) rotate(-1deg); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) rotate(-1deg); }
+}
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 560px) {
+  .wall { columns: 2 150px; column-gap: 1rem; }
+  .photo { margin-bottom: 1.2rem; }
+  .photo figcaption { font-size: 1.05rem; }
+  .lb-arrow { display: none; }   /* swipe-sized screens: tap edges instead */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo, .paper, .photo.developing img, .loader-cam, .loader-flash,
+  body::before, body::after {
+    animation: none !important;
+  }
+}
