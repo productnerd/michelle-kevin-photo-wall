@@ -18,8 +18,6 @@ const STOCK = [
   { seed: 'mk14', cap: 'best seats in the house' },
 ];
 
-const PIN_COLORS = ['#8A5A38', '#DCCBA8', '#3B7A4A', '#2A2420'];
-
 /** All photos on the wall, newest first. {src, cap, filename, stamp} */
 const photos = STOCK.map((p, i) => ({
   src: `photos/${p.seed}.${p.isVideo ? 'mp4' : 'jpg'}?v=2`,
@@ -45,23 +43,13 @@ const toast = document.getElementById('toast');
 
 /* ---------- build the wall ---------- */
 
-function rand(min, max) { return min + Math.random() * (max - min); }
-
 function buildCard(photo, delaySec) {
   const fig = document.createElement('figure');
   fig.className = 'photo developing';
-  const tilt = (Math.random() < 0.5 ? -1 : 1) * rand(1.2, 4.5);
-  fig.style.setProperty('--tilt', `${tilt.toFixed(1)}deg`);
   fig.style.setProperty('--delay', `${delaySec.toFixed(2)}s`);
-  fig.style.setProperty('--sway', `${rand(5, 9).toFixed(1)}s`);
-  fig.style.setProperty('--pinx', `${rand(-16, 0).toFixed(0)}px`);
   fig.tabIndex = 0;
   fig.setAttribute('role', 'button');
   fig.setAttribute('aria-label', `View photo: ${photo.cap}`);
-
-  const pin = document.createElement('span');
-  pin.className = 'pin';
-  pin.style.setProperty('--pin', PIN_COLORS[Math.floor(Math.random() * PIN_COLORS.length)]);
 
   const paper = document.createElement('div');
   paper.className = 'paper';
@@ -97,7 +85,7 @@ function buildCard(photo, delaySec) {
   cap.textContent = photo.cap;
 
   paper.append(wrap, cap);
-  fig.append(pin, paper);
+  fig.append(paper);
 
   if (photo.isNew) {
     const sticker = document.createElement('span');
@@ -106,16 +94,10 @@ function buildCard(photo, delaySec) {
     fig.append(sticker);
   }
 
-  // swing on hover, but let the animation run to rest even after the
-  // cursor leaves (class is only removed on animationend)
-  fig.addEventListener('mouseenter', () => fig.classList.add('swinging'));
-  paper.addEventListener('animationend', (e) => {
-    if (e.animationName === 'hover-swing') fig.classList.remove('swinging');
-  });
-  // once settled, disable entry animations so re-slotting into columns
-  // (resize, new uploads) doesn't replay the drop-in
+  // once developed, disable the entry animation so re-slotting into
+  // columns (resize, new uploads) doesn't replay it
   fig.addEventListener('animationend', (e) => {
-    if (e.animationName === 'settle') fig.classList.add('pinned');
+    if (e.animationName === 'develop') fig.classList.add('pinned');
   });
 
   fig._photo = photo;

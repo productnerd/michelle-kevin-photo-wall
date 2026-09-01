@@ -252,41 +252,15 @@ body::after {
   display: block;
   width: 100%;
   margin: 0 0 1.9rem;
-  padding-top: 8px;
-  transform: rotate(var(--tilt, -2deg));
-  transform-origin: 50% 8px;              /* swing from the pin */
-  animation: drop-in 0.55s cubic-bezier(0.2, 0.7, 0.3, 1.1) both,
-             settle 1.7s ease-in-out 0.55s both;
-  animation-delay: var(--delay, 0s), calc(var(--delay, 0s) + 0.55s);
   cursor: zoom-in;
 }
 
-.photo .pin {
-  top: 0;
-  left: 50%;
-  margin-left: var(--pinx, -8px);
-}
-
-@keyframes drop-in {
-  from { opacity: 0; transform: translateY(-46px) rotate(calc(var(--tilt, -2deg) + 8deg)); }
-  to   { opacity: 1; transform: translateY(0)     rotate(calc(var(--tilt, -2deg) + 8deg)); }
-}
-@keyframes settle {
-  0%   { transform: rotate(calc(var(--tilt, -2deg) + 8deg)); }
-  28%  { transform: rotate(calc(var(--tilt, -2deg) - 5deg)); }
-  55%  { transform: rotate(calc(var(--tilt, -2deg) + 2.5deg)); }
-  78%  { transform: rotate(calc(var(--tilt, -2deg) - 1deg)); }
-  100% { transform: rotate(var(--tilt, -2deg)); }
-}
-
-/* once settled, entry animations are switched off so re-slotting cards
-   into columns (resize, new uploads) doesn't replay the drop-in */
-.photo.pinned { animation: none; }
+/* once developed, the entry animation is switched off so re-slotting
+   cards into columns (resize, new uploads) doesn't replay it */
 .photo.pinned img,
 .photo.pinned video { animation: none; }
 
-/* the paper print itself — idle sway + hover swing live here so they
-   never restart the card's entry animation */
+/* the paper print itself */
 .paper {
   position: relative;
   background: linear-gradient(165deg, #FFFEF9 0%, #FCF8EC 55%, #F3EBDA 100%);
@@ -297,9 +271,7 @@ body::after {
     0 14px 28px rgba(42, 36, 32, 0.13);   /* ambient */
   border-radius: 6px;
   padding: 9px 9px 0.4rem;
-  transform-origin: 50% -8px;
   transition: box-shadow 0.35s ease;
-  animation: sway var(--sway, 6s) ease-in-out calc(var(--delay, 0s) + 2.25s) infinite;
 }
 
 /* one continuous lift shadow along the bottom — the print sits slightly
@@ -323,25 +295,7 @@ body::after {
     0 9px 18px rgba(42, 36, 32, 0.18),
     0 24px 42px rgba(42, 36, 32, 0.15);
 }
-.photo.swinging .paper {
-  animation: hover-swing 1.7s ease-in-out;
-}
 .photo:hover { z-index: 4; }
-
-@keyframes sway {
-  0%, 100% { transform: rotate(0deg); }
-  25%      { transform: rotate(0.7deg); }
-  75%      { transform: rotate(-0.7deg); }
-}
-@keyframes hover-swing {
-  0%   { transform: rotate(0deg); }
-  14%  { transform: rotate(4deg); }
-  34%  { transform: rotate(-3deg); }
-  54%  { transform: rotate(1.7deg); }
-  72%  { transform: rotate(-0.8deg); }
-  87%  { transform: rotate(0.35deg); }
-  100% { transform: rotate(0deg); }
-}
 
 .img-wrap {
   position: relative;
@@ -546,7 +500,7 @@ body::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .photo, .paper, .photo.developing img, .loader-cam, .loader-flash,
+  .photo.developing img, .photo.developing video, .loader-cam, .loader-flash,
   body::before, body::after {
     animation: none !important;
   }
