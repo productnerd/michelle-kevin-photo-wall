@@ -290,6 +290,65 @@ function saveBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
+/* ---------- background music (kaimakki-survey pattern) ---------- */
+
+const MUSIC_KEY = 'mk_wall_music';
+const MUSIC_VOL = 0.21;
+const MUSIC_FADE_MS = 5000;
+const musicBtn = document.getElementById('musicBtn');
+const music = new Audio('music.mp3');
+music.loop = true;
+music.preload = 'auto';
+music.volume = 0;
+let musicFade = 0;
+let musicOn = localStorage.getItem(MUSIC_KEY) !== 'off';
+
+function musicRampTo(target, ms) {
+  cancelAnimationFrame(musicFade);
+  const from = music.volume;
+  const started = performance.now();
+  const step = (now) => {
+    const t = ms === 0 ? 1 : Math.min(1, (now - started) / ms);
+    music.volume = Math.max(0, Math.min(1, from + (target - from) * t));
+    if (t < 1) musicFade = requestAnimationFrame(step);
+    else if (target === 0) music.pause();
+  };
+  musicFade = requestAnimationFrame(step);
+}
+
+function startMusic(ms) {
+  music.volume = 0;
+  return music.play().then(() => musicRampTo(MUSIC_VOL, ms));
+}
+
+function renderMusicBtn() {
+  musicBtn.classList.toggle('muted', !musicOn);
+  musicBtn.setAttribute('aria-pressed', String(musicOn));
+  musicBtn.setAttribute('aria-label', musicOn ? 'Mute the music' : 'Unmute the music');
+}
+
+if (musicOn) {
+  // Autoplay with sound is blocked until the page has been interacted
+  // with, so this first attempt is expected to fail on a fresh visit —
+  // the first click or key press starts it instead.
+  startMusic(MUSIC_FADE_MS).catch(() => {
+    const kick = () => {
+      if (musicOn && music.paused) startMusic(MUSIC_FADE_MS).catch(() => {});
+    };
+    document.addEventListener('pointerdown', kick, { once: true });
+    document.addEventListener('keydown', kick, { once: true });
+  });
+}
+
+musicBtn.addEventListener('click', () => {
+  musicOn = !musicOn;
+  localStorage.setItem(MUSIC_KEY, musicOn ? 'on' : 'off');
+  if (musicOn) startMusic(600).catch(() => {});
+  else musicRampTo(0, 400);
+  renderMusicBtn();
+});
+renderMusicBtn();
+
 /* ---------- lightbox ---------- */
 
 const lightbox = document.getElementById('lightbox');

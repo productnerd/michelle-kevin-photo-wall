@@ -408,6 +408,37 @@ body::after {
   flex-shrink: 0;
 }
 
+/* ---------- music ---------- */
+
+.music-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 65;   /* above the lightbox, below the toast */
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid rgba(107, 89, 65, 0.25);
+  box-shadow: 0 2px 8px rgba(42, 36, 32, 0.16);
+  color: var(--off-black);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, color 0.12s ease;
+}
+.music-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(42, 36, 32, 0.22);
+}
+.music-btn:active { transform: translateY(1px); box-shadow: 0 1px 4px rgba(42, 36, 32, 0.18); }
+.music-btn svg { width: 20px; height: 20px; }
+.music-btn .slash { display: none; }
+.music-btn.muted { color: rgba(42, 36, 32, 0.45); }
+.music-btn.muted .waves { display: none; }
+.music-btn.muted .slash { display: block; }
+
 /* ---------- toast ---------- */
 
 .toast {
