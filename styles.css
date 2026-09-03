@@ -179,11 +179,17 @@ body::after {
   box-shadow: 3px 3px 0 var(--off-black);
   border-radius: 6px;
   cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+.btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--off-black);
+  filter: brightness(1.07);
 }
 .btn:active {
-  box-shadow: none;
+  box-shadow: 0 0 0 var(--off-black);
   transform: translate(3px, 3px);
+  filter: brightness(0.95);
 }
 .btn:disabled { opacity: 0.6; cursor: wait; }
 .btn-brown { background: var(--brown); color: #fff; }
@@ -370,10 +376,19 @@ body::after {
   border-radius: 6px;
   font-family: var(--font-display);
   cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+.lb-close:hover,
+.lb-arrow:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  background: #FFFFFF;
 }
 .lb-close:active,
-.lb-arrow:active { box-shadow: none; transform: translate(3px, 3px); }
+.lb-arrow:active {
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0.4);
+  transform: translate(3px, 3px);
+}
 
 .lb-close {
   position: absolute;
