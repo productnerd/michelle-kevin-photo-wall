@@ -1,27 +1,26 @@
 /* Michelle & Kevin — party photo wall */
 
 const STOCK = [
-  { seed: 'mk01', cap: 'the culprits themselves 🎂' },
-  { seed: 'mk02', cap: '' },
-  { seed: 'mk03', cap: "kevin's third slice" },
-  { seed: 'mk04', cap: "michelle's happy tears" },
-  { seed: 'mk05', cap: '' },
-  { seed: 'mk06', cap: 'dance floor situation' },
-  { seed: 'mk07', cap: 'cheers × one hundred' },
-  { seed: 'mk15', cap: 'the dance floor, live 🎬', isVideo: true },
-  { seed: 'mk08', cap: '' },
-  { seed: 'mk09', cap: '3am survivors club' },
-  { seed: 'mk10', cap: 'the toast, take two' },
-  { seed: 'mk11', cap: '' },
-  { seed: 'mk12', cap: 'cake > everything' },
-  { seed: 'mk13', cap: '' },
-  { seed: 'mk14', cap: 'best seats in the house' },
+  { seed: 'mk01' },
+  { seed: 'mk02' },
+  { seed: 'mk03' },
+  { seed: 'mk04' },
+  { seed: 'mk05' },
+  { seed: 'mk06' },
+  { seed: 'mk07' },
+  { seed: 'mk15', isVideo: true },
+  { seed: 'mk08' },
+  { seed: 'mk09' },
+  { seed: 'mk10' },
+  { seed: 'mk11' },
+  { seed: 'mk12' },
+  { seed: 'mk13' },
+  { seed: 'mk14' },
 ];
 
-/** All photos on the wall, newest first. {src, cap, filename, stamp} */
+/** All photos on the wall, newest first. {src, filename, stamp} */
 const photos = STOCK.map((p, i) => ({
   src: `photos/${p.seed}.${p.isVideo ? 'mp4' : 'jpg'}?v=2`,
-  cap: p.cap,
   filename: `michelle-kevin-${String(i + 1).padStart(2, '0')}.${p.isVideo ? 'mp4' : 'jpg'}`,
   stamp: "22 08 '26",
   isVideo: !!p.isVideo,
@@ -49,7 +48,7 @@ function buildCard(photo, delaySec) {
   fig.style.setProperty('--delay', `${delaySec.toFixed(2)}s`);
   fig.tabIndex = 0;
   fig.setAttribute('role', 'button');
-  fig.setAttribute('aria-label', `View photo: ${photo.cap || 'party photo'}`);
+  fig.setAttribute('aria-label', photo.isVideo ? 'View video' : 'View photo');
 
   const paper = document.createElement('div');
   paper.className = 'paper';
@@ -66,7 +65,7 @@ function buildCard(photo, delaySec) {
     media.setAttribute('playsinline', '');
     media.autoplay = true;
     media.loop = true;
-    media.setAttribute('aria-label', photo.cap);
+    media.setAttribute('aria-label', 'party video');
     // long clips: loop just the first ~4.5s on the wall
     media.addEventListener('timeupdate', () => {
       if (media.currentTime > 4.5) media.currentTime = 0;
@@ -74,21 +73,14 @@ function buildCard(photo, delaySec) {
   } else {
     media = document.createElement('img');
     media.src = photo.src;
-    media.alt = photo.cap;
+    media.alt = 'party photo';
   }
   const stamp = document.createElement('span');
   stamp.className = 'stamp';
   stamp.textContent = photo.stamp;
   wrap.append(media, stamp);
 
-  if (photo.cap) {
-    const cap = document.createElement('figcaption');
-    cap.textContent = photo.cap;
-    paper.append(wrap, cap);
-  } else {
-    paper.classList.add('no-cap');
-    paper.append(wrap);
-  }
+  paper.append(wrap);
   fig.append(paper);
 
   if (photo.isNew) {
@@ -156,7 +148,6 @@ async function loadShared() {
       const d = f.created_at ? new Date(f.created_at) : null;
       const photo = {
         src: sb.storage.from(BUCKET).getPublicUrl(`uploads/${f.name}`).data.publicUrl,
-        cap: isVideo ? 'caught on tape 🎬' : 'fresh from your camera ✨',
         filename: `guest-${f.name.replace(/^\d+-\w+-/, '')}`,
         stamp: d ? `${String(d.getDate()).padStart(2, '0')} ${String(d.getMonth() + 1).padStart(2, '0')} '${String(d.getFullYear() % 100)}` : '',
         isVideo,
@@ -240,7 +231,6 @@ async function addFiles(files) {
     const isVideo = file.type.startsWith('video/');
     const photo = {
       src: URL.createObjectURL(file),
-      cap: isVideo ? 'caught on tape 🎬' : 'fresh from your camera ✨',
       filename: `guest-${file.name.replace(/[^\w.\-]+/g, '_')}`,
       stamp,
       isNew: true,
@@ -294,71 +284,10 @@ function saveBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-/* ---------- background music (kaimakki-survey pattern) ---------- */
-
-const MUSIC_KEY = 'mk_wall_music';
-const MUSIC_VOL = 0.21;
-const MUSIC_FADE_MS = 5000;
-const musicBtn = document.getElementById('musicBtn');
-const music = new Audio('music.mp3');
-music.loop = true;
-music.preload = 'auto';
-music.volume = 0;
-let musicFade = 0;
-let musicOn = localStorage.getItem(MUSIC_KEY) !== 'off';
-
-function musicRampTo(target, ms) {
-  cancelAnimationFrame(musicFade);
-  const from = music.volume;
-  const started = performance.now();
-  const step = (now) => {
-    const t = ms === 0 ? 1 : Math.min(1, (now - started) / ms);
-    const eased = t * t * (3 - 2 * t);   // smoothstep: gentle in and out
-    music.volume = Math.max(0, Math.min(1, from + (target - from) * eased));
-    if (t < 1) musicFade = requestAnimationFrame(step);
-    else if (target === 0) music.pause();
-  };
-  musicFade = requestAnimationFrame(step);
-}
-
-function startMusic(ms) {
-  music.volume = 0;
-  return music.play().then(() => musicRampTo(MUSIC_VOL, ms));
-}
-
-function renderMusicBtn() {
-  musicBtn.classList.toggle('muted', !musicOn);
-  musicBtn.setAttribute('aria-pressed', String(musicOn));
-  musicBtn.setAttribute('aria-label', musicOn ? 'Mute the music' : 'Unmute the music');
-}
-
-if (musicOn) {
-  // Autoplay with sound is blocked until the page has been interacted
-  // with, so this first attempt is expected to fail on a fresh visit —
-  // the first click or key press starts it instead.
-  startMusic(MUSIC_FADE_MS).catch(() => {
-    const kick = () => {
-      if (musicOn && music.paused) startMusic(MUSIC_FADE_MS).catch(() => {});
-    };
-    document.addEventListener('pointerdown', kick, { once: true });
-    document.addEventListener('keydown', kick, { once: true });
-  });
-}
-
-musicBtn.addEventListener('click', () => {
-  musicOn = !musicOn;
-  localStorage.setItem(MUSIC_KEY, musicOn ? 'on' : 'off');
-  if (musicOn) startMusic(1800).catch(() => {});
-  else musicRampTo(0, 1200);
-  renderMusicBtn();
-});
-renderMusicBtn();
-
 /* ---------- lightbox ---------- */
 
 const lightbox = document.getElementById('lightbox');
 const lbMedia = document.getElementById('lbMedia');
-const lbCaption = document.getElementById('lbCaption');
 let lbIndex = 0;
 
 function openLightbox(index) {
@@ -386,11 +315,9 @@ function renderLightbox() {
   } else {
     el = document.createElement('img');
     el.src = p.src;
-    el.alt = p.cap;
+    el.alt = 'party photo';
   }
   lbMedia.append(el);
-  lbCaption.textContent = p.cap || '';
-  lbCaption.hidden = !p.cap;
 }
 function step(dir) {
   lbIndex = (lbIndex + dir + photos.length) % photos.length;
