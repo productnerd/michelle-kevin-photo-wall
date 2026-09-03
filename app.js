@@ -2,19 +2,19 @@
 
 const STOCK = [
   { seed: 'mk01', cap: 'the culprits themselves 🎂' },
-  { seed: 'mk02', cap: 'someone said open bar' },
+  { seed: 'mk02', cap: '' },
   { seed: 'mk03', cap: "kevin's third slice" },
   { seed: 'mk04', cap: "michelle's happy tears" },
-  { seed: 'mk05', cap: 'blurry but very happy' },
+  { seed: 'mk05', cap: '' },
   { seed: 'mk06', cap: 'dance floor situation' },
   { seed: 'mk07', cap: 'cheers × one hundred' },
   { seed: 'mk15', cap: 'the dance floor, live 🎬', isVideo: true },
-  { seed: 'mk08', cap: 'the confetti aftermath' },
+  { seed: 'mk08', cap: '' },
   { seed: 'mk09', cap: '3am survivors club' },
   { seed: 'mk10', cap: 'the toast, take two' },
-  { seed: 'mk11', cap: 'unsupervised balloon crew' },
+  { seed: 'mk11', cap: '' },
   { seed: 'mk12', cap: 'cake > everything' },
-  { seed: 'mk13', cap: 'the getaway car' },
+  { seed: 'mk13', cap: '' },
   { seed: 'mk14', cap: 'best seats in the house' },
 ];
 
@@ -49,7 +49,7 @@ function buildCard(photo, delaySec) {
   fig.style.setProperty('--delay', `${delaySec.toFixed(2)}s`);
   fig.tabIndex = 0;
   fig.setAttribute('role', 'button');
-  fig.setAttribute('aria-label', `View photo: ${photo.cap}`);
+  fig.setAttribute('aria-label', `View photo: ${photo.cap || 'party photo'}`);
 
   const paper = document.createElement('div');
   paper.className = 'paper';
@@ -81,10 +81,14 @@ function buildCard(photo, delaySec) {
   stamp.textContent = photo.stamp;
   wrap.append(media, stamp);
 
-  const cap = document.createElement('figcaption');
-  cap.textContent = photo.cap;
-
-  paper.append(wrap, cap);
+  if (photo.cap) {
+    const cap = document.createElement('figcaption');
+    cap.textContent = photo.cap;
+    paper.append(wrap, cap);
+  } else {
+    paper.classList.add('no-cap');
+    paper.append(wrap);
+  }
   fig.append(paper);
 
   if (photo.isNew) {
@@ -385,7 +389,8 @@ function renderLightbox() {
     el.alt = p.cap;
   }
   lbMedia.append(el);
-  lbCaption.textContent = p.cap;
+  lbCaption.textContent = p.cap || '';
+  lbCaption.hidden = !p.cap;
 }
 function step(dir) {
   lbIndex = (lbIndex + dir + photos.length) % photos.length;

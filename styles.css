@@ -246,6 +246,9 @@ body::after {
 }
 .photo:hover { z-index: 4; }
 
+/* captionless cards: even padding all round */
+.paper.no-cap { padding-bottom: 8px; }
+
 .img-wrap {
   position: relative;
   overflow: hidden;
