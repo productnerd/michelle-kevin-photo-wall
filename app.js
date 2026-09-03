@@ -309,7 +309,8 @@ function musicRampTo(target, ms) {
   const started = performance.now();
   const step = (now) => {
     const t = ms === 0 ? 1 : Math.min(1, (now - started) / ms);
-    music.volume = Math.max(0, Math.min(1, from + (target - from) * t));
+    const eased = t * t * (3 - 2 * t);   // smoothstep: gentle in and out
+    music.volume = Math.max(0, Math.min(1, from + (target - from) * eased));
     if (t < 1) musicFade = requestAnimationFrame(step);
     else if (target === 0) music.pause();
   };
@@ -343,8 +344,8 @@ if (musicOn) {
 musicBtn.addEventListener('click', () => {
   musicOn = !musicOn;
   localStorage.setItem(MUSIC_KEY, musicOn ? 'on' : 'off');
-  if (musicOn) startMusic(600).catch(() => {});
-  else musicRampTo(0, 400);
+  if (musicOn) startMusic(1800).catch(() => {});
+  else musicRampTo(0, 1200);
   renderMusicBtn();
 });
 renderMusicBtn();
