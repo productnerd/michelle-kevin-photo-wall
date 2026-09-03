@@ -290,38 +290,6 @@ function saveBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-const downloadAllBtn = document.getElementById('downloadAllBtn');
-downloadAllBtn.addEventListener('click', async () => {
-  if (typeof JSZip === 'undefined') {
-    showToast('zip helper failed to load — try refreshing');
-    return;
-  }
-  downloadAllBtn.disabled = true;
-  const original = downloadAllBtn.innerHTML;
-  try {
-    const zip = new JSZip();
-    let done = 0;
-    await Promise.all(photos.map(async (p) => {
-      try {
-        zip.file(p.filename, await fetchBlob(p.src));
-      } catch (e) {
-        console.warn('skipping', p.filename, e);
-      }
-      done += 1;
-      downloadAllBtn.textContent = `zipping… ${done}/${photos.length}`;
-    }));
-    const blob = await zip.generateAsync({ type: 'blob' });
-    saveBlob(blob, 'michelle-and-kevin-photo-wall.zip');
-    showToast('the whole wall is coming your way 📦');
-  } catch (e) {
-    console.error(e);
-    showToast('hmm, the zip jammed — try again?');
-  } finally {
-    downloadAllBtn.disabled = false;
-    downloadAllBtn.innerHTML = original;
-  }
-});
-
 /* ---------- lightbox ---------- */
 
 const lightbox = document.getElementById('lightbox');
